@@ -82,7 +82,9 @@ fn create_example_markdown(mut file: File) -> std::io::Result<()> {
     let mk_raw = 
 r##"
 # Hello World
-This is a test.
+Welcome to Wingman! Generate your blog by writing markdown in as many files as you like here in the ./posts folder. 
+The order your posts appear on the page depends on how you organize your directory. I suggest a YYYY--MM-DD-SLUG methodology for reverse chronological.
+There will be further customization and parsing in the future.
 "##;
 
     file.write_all(mk_raw.as_bytes())?;
