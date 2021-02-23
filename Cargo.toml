@@ -7,7 +7,7 @@ description = "Static site generator and theming engine."
 license = "AGPL-3.0"
 readme = "readme.md"
 repository = "https://github.com/tristanisham/Wingman"
-keywords = ["Gopher", "Gemini", "Static-Site-Generator", "Build-Tools", "web-dev"]
+keywords = ["Gopher", "Gemini", "binary", "Build-Tools", "web-dev", "blog"]
 categories = ["command-line-utilities", "development-tools::static-sites"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
