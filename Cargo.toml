@@ -8,7 +8,7 @@ license = "AGPL-3.0"
 readme = "readme.md"
 repository = "https://github.com/tristanisham/Wingman"
 keywords = ["Gopher", "Gemini", "binary", "Build-Tools", "web-dev"]
-categories = ["command-line-utilities", "development-tools::static-sites"]
+categories = ["command-line-utilities", "command-line-interface", "development-tools", "web-programming"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
