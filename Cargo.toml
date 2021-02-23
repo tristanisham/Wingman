@@ -1,6 +1,6 @@
 [package]
-name = "wingman"
-version = "0.0.4"
+name = "Wingman"
+version = "0.0.5"
 authors = ["Tristan Isham <tristan@isham.co>"]
 edition = "2018"
 description = "Static site generator and theming engine."
