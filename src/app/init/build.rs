@@ -29,7 +29,7 @@ fn parse() {
 }
 
 pub mod markdown {
-    use crate::new;
+    // use crate::new;
     use pulldown_cmark::{html, Options, Parser};
     // use std::ffi::OsStr;
     use std::fs;
@@ -73,8 +73,8 @@ pub mod markdown {
         </body>
         </html>");
 
-        let mut index = File::create("./bin/index.html")?;
-        write_index(index, result);
+        let index = File::create("./bin/index.html")?;
+        write_index(index, result)?;
         
         Ok(())
     }
@@ -90,7 +90,7 @@ pub mod markdown {
     }
 
     fn write_index(mut file: File, string: String) -> std::io::Result<()> {
-        let mut input = string.as_bytes();
+        let input = string.as_bytes();
         file.write_all(input)?;
         Ok(())
     }
