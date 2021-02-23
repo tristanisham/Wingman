@@ -16,3 +16,5 @@ categories = ["command-line-utilities", "command-line-interface", "development-t
 ansi_term = "0.12.1"
 json = "0.12.4"
 pulldown-cmark = "0.8.0"
+
+# Live version on Cargo is 0.0.4
