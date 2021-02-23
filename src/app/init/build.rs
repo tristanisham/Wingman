@@ -72,7 +72,7 @@ pub mod markdown {
         result.push_str("
         </body>
         </html>");
-
+        //OUTPUT AND BUILD FINALIZES
         let index = File::create("./bin/index.html")?;
         write_index(index, result)?;
         
