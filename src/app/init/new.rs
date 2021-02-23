@@ -13,7 +13,6 @@ pub mod make {
     use crate::new;
     use std::fs;
     use std::fs::{File};
-    use std::path::Path;
     use crate::build::markdown;
 
     pub fn blog() {
