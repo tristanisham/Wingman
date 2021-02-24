@@ -55,6 +55,8 @@ pub mod markdown {
         let seed_js =
             fs::read_to_string("seed.json").expect("Something went wrong reading the file");
         let seed = json::parse(&seed_js).expect("Parsing failed");
+        // VEC for total number of posts
+        // let mut ids: Vec<u32> = Vec::new();
 
         let mut result: String = "<!DOCTYPE html>
         <html lang=\"en\">
@@ -63,7 +65,7 @@ pub mod markdown {
             <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
             <meta name=\"description\" content="
-        .to_string();
+            .to_string();
         //Description
         if !&seed["vars"]["description"].is_empty() || !&seed["vars"]["description"].is_null() {
             result.push_str(&seed["vars"]["description"].dump().to_string());
@@ -71,18 +73,20 @@ pub mod markdown {
             result.push_str("\"\"");
         }
         result.push_str(">");
-                //Description
-                if !&seed["vars"]["description"].is_empty() || !&seed["vars"]["description"].is_null() {
-                    result.push_str("<meta name=\"author\" content=");
-                    result.push_str(&seed["vars"]["author"].dump().to_string());
-                } else {
-                    result.push_str("\"\"");
-                }
-                result.push_str(">");
-        
-        result.push_str("
+        //Description
+        if !&seed["vars"]["description"].is_empty() || !&seed["vars"]["description"].is_null() {
+            result.push_str("<meta name=\"author\" content=");
+            result.push_str(&seed["vars"]["author"].dump().to_string());
+        } else {
+            result.push_str("\"\"");
+        }
+        result.push_str(">");
+
+        result.push_str(
+            "
         <title>
-            ");
+            ",
+        );
         //set title
         let vars_title = &seed["vars"]["title"];
         if !vars_title.is_empty() || !vars_title.is_null() {
@@ -90,16 +94,32 @@ pub mod markdown {
         }
         // result.push_str(&seed["vars"]["title"].dump().to_string());
 
-        result.push_str("
+        result.push_str(
+            "
         </title>
         </head>
         <body>",
         );
+        let mut placement = 0;
+        //gets number of posts 
+        // Uses vec ID up by top of function
+        
+        // for _content in &files {
+        //     ids.push(placement);
+        //     placement += 1;
+        // }
+        // for x in ids{ println!("{}", x);}
+        // placement = 0;
 
         for content in files {
-            result.push_str("<article>\n");
+            result.push_str("<article id =\"");
+            let str_plc: &str = &placement.to_string()[..];
+            result.push_str(str_plc);
+            result.push_str("\">\n");
+            
+            placement += 1;
             result.push_str(&content);
-            result.push_str("</article>\n");
+            result.push_str("</article>");
         }
 
         result.push_str("</body>\n<footer>");
