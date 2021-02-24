@@ -1,6 +1,6 @@
 [package]
 name = "wingman"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Tristan Isham <tristan@isham.co>"]
 edition = "2018"
 description = "Static site generator and theming engine."
@@ -16,5 +16,7 @@ categories = ["command-line-utilities", "command-line-interface", "development-t
 ansi_term = "0.12.1"
 json = "0.12.4"
 pulldown-cmark = "0.8.0"
+# regex = "1.4.3"
+
 
 # Live version on Cargo is 0.0.4

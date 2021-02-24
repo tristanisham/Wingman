@@ -2,18 +2,25 @@ use std::fs::File;
 use std::io::prelude::*;
 
 /// Creates standard seed file
-pub fn seed() {
-    match create_seed_json() {
-        Ok(()) => println!("Seed file generated"),
-        Err(e) => eprintln!("new::seed() | {}", e),
+pub fn seed(param: String) {
+    if param == "blog" {
+        match create_blog_seed_json() {
+            Ok(()) => println!("Seed file generated"),
+            Err(e) => eprintln!("new::seed() | {}", e),
+        }
+    } else {
+        match create_seed_json() {
+            Ok(()) => println!("Seed file generated"),
+            Err(e) => eprintln!("new::seed() | {}", e),
+        }
     }
 }
 
 pub mod make {
+    use crate::build::markdown;
     use crate::new;
     use std::fs;
-    use std::fs::{File};
-    use crate::build::markdown;
+    use std::fs::File;
 
     pub fn blog() {
         match make_dir() {
@@ -24,7 +31,6 @@ pub mod make {
 
     fn make_dir() -> std::io::Result<()> {
         fs::create_dir_all("./bin/posts/")?;
-        
         //READS THE POSTS DIR
         let posts_paths = fs::read_dir("./bin/posts/")?;
         if posts_paths.count() == 0 {
@@ -39,18 +45,38 @@ pub mod make {
             }
         }
 
-        
-
         Ok(())
     }
 }
 
 fn create_seed_json() -> std::io::Result<()> {
     println!("Supported types: Portfolio, Blog, Form");
-    let seed_raw = 
-r#"{
+    let seed_raw = r#"{
 "type":"",
 "head":"",
+"vars": {
+    "title":"",
+    "description":"",
+    "author":""
+},
+"footer":"",
+"theme":""
+}"#;
+    let mut seed_file = File::create("seed.json")?;
+    seed_file.write_all(seed_raw.as_bytes())?;
+    Ok(())
+}
+
+fn create_blog_seed_json() -> std::io::Result<()> {
+    println!("Supported types: Portfolio, Blog, Form");
+    let seed_raw = r#"{
+"type":"blog",
+"head":"",
+"vars": {
+    "title":"",
+    "description":"",
+    "author":""
+},
 "footer":"",
 "theme":""
 }"#;
@@ -60,7 +86,7 @@ r#"{
 }
 
 // pub fn create_index_html(mut file: File) -> std::io::Result<()> {
-//     let index_raw = 
+//     let index_raw =
 // r#"<!DOCTYPE html>
 // <html lang="en">
 // <head>
@@ -70,7 +96,6 @@ r#"{
 //     <title>Made with Wingman</title>
 // </head>
 // <body>
-    
 // </body>
 // </html>"#;
 //     file.write_all(index_raw.as_bytes())?;
@@ -78,8 +103,7 @@ r#"{
 // }
 
 fn create_example_markdown(mut file: File) -> std::io::Result<()> {
-    let mk_raw = 
-r##"
+    let mk_raw = r##"
 # Hello World
 Welcome to Wingman! Generate your blog by writing markdown in as many files as you like here in the ./posts folder. 
 The order your posts appear on the page depends on how you organize your directory. I suggest a YYYY--MM-DD-SLUG methodology for reverse chronological.

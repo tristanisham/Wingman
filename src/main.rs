@@ -8,10 +8,9 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let cmd = &args[1];
-    let mut _param: &String;
-
+    let mut param: &String = &String::from("");
     if args.len() == 3usize {
-        _param = &args[2];
+        param = &args[2];
     }
 
     if cmd == "--help" || cmd == "-h" {
@@ -21,10 +20,20 @@ fn main() {
             println!("{}", x);
         }
     } else if cmd == "new" || cmd == "n" {
-        new::seed();
+        if param == "" {
+            new::seed("".to_string());
+        } else if param == "--blog" {
+            new::seed("blog".to_string())
+        } else {
+            print_help();
+        }
     } else if cmd == "build" || cmd == "b" {
         build::generate();
     } else {
+        print_help();
+    }
+
+    fn print_help() {
         println!(
             "{}\n{}",
             Style::new().bold().paint("Invalid Argument"),
@@ -36,5 +45,7 @@ fn main() {
         for x in &help_array {
             println!("{}", x);
         }
+
+        println!("\n\n{}\n {}", Style::new().bold().paint("'new' flags:"), Style::new().italic().paint("--blog\n"));
     }
 }

@@ -7,8 +7,8 @@ use crate::new;
 pub fn generate() {
     let seed_json = Path::new("seed.json");
     if !seed_json.exists() {
-        new::seed();
-        println!("Seed file generated. Please run again after filling out required fields.");
+        new::seed("".to_string());
+        println!("Please run again after filling out required fields.");
     } else {
         parse();
     }
@@ -35,6 +35,7 @@ pub mod markdown {
     use std::fs;
     use std::fs::File;
     use std::io::prelude::*;
+    // use regex::Regex;
     // use std::path::Path;
     pub fn gather() -> std::io::Result<()> {
         let posts = fs::read_dir("./bin/posts/")?;
@@ -51,17 +52,49 @@ pub mod markdown {
             md_html(content, &mut files);
         }
 
+        let seed_js =
+            fs::read_to_string("seed.json").expect("Something went wrong reading the file");
+        let seed = json::parse(&seed_js).expect("Parsing failed");
+
         let mut result: String = "<!DOCTYPE html>
         <html lang=\"en\">
         <head>
             <meta charset=\"UTF-8\\>
             <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-            <title>Made with Wingman</title>
+            <meta name=\"description\" content="
+        .to_string();
+        //Description
+        if !&seed["vars"]["description"].is_empty() || !&seed["vars"]["description"].is_null() {
+            result.push_str(&seed["vars"]["description"].dump().to_string());
+        } else {
+            result.push_str("\"\"");
+        }
+        result.push_str(">");
+                //Description
+                if !&seed["vars"]["description"].is_empty() || !&seed["vars"]["description"].is_null() {
+                    result.push_str("<meta name=\"author\" content=");
+                    result.push_str(&seed["vars"]["author"].dump().to_string());
+                } else {
+                    result.push_str("\"\"");
+                }
+                result.push_str(">");
+        
+        result.push_str("
+        <title>
+            ");
+        //set title
+        let vars_title = &seed["vars"]["title"];
+        if !vars_title.is_empty() || !vars_title.is_null() {
+            result.push_str(&vars_title.dump());
+        }
+        // result.push_str(&seed["vars"]["title"].dump().to_string());
+
+        result.push_str("
+        </title>
         </head>
-        <body>
-            
-        ".to_string();
+        <body>",
+        );
 
         for content in files {
             result.push_str("<article>\n");
@@ -69,13 +102,12 @@ pub mod markdown {
             result.push_str("</article>\n");
         }
 
-        result.push_str("
-        </body>
-        </html>");
+        result.push_str("</body>\n<footer>");
+        // result.push_str("<au");
+        result.push_str("</footer></html>");
         //OUTPUT AND BUILD FINALIZES
         let index = File::create("./bin/index.html")?;
         write_index(index, result)?;
-        
         Ok(())
     }
 
