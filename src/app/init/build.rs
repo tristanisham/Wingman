@@ -122,9 +122,9 @@ pub mod markdown {
             result.push_str("</article>");
         }
 
-        result.push_str("</body>\n<footer>");
+        result.push_str("<footer>");
         // result.push_str("<au");
-        result.push_str("</footer></html>");
+        result.push_str("</footer>\n</body>\n</html>");
         //OUTPUT AND BUILD FINALIZES
         let index = File::create("./bin/index.html")?;
         write_index(index, result)?;
