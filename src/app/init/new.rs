@@ -1,3 +1,5 @@
+use crate::build;
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -17,9 +19,19 @@ pub fn seed(param: String) {
 }
 
 pub fn post() {
-    match make::post() {
-        Ok(_) => println!("New Post Generated"),
-        Err(e) => eprintln!("{}", e),
+    let file = fs::read_to_string("seed.json").expect("Something went wrong reading the file");
+    let seed = json::parse(&file).expect("Parsing failed");
+    if !seed["type"].is_empty()
+        && !seed["type"].is_null()
+        && seed["type"].dump().to_lowercase() == "\"blog\""
+    {
+        build::generate();
+        match make::post() {
+            Ok(_) => println!("New Post Generated"),
+            Err(e) => eprintln!("{}", e),
+        }
+    } else {
+        panic!("Requires 'Seed type: blog'")
     }
 }
 
@@ -78,7 +90,6 @@ pub mod make {
         path.push_str(".md");
 
         return path;
-
     }
 }
 

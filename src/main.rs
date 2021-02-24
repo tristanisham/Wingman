@@ -37,7 +37,7 @@ fn main() {
         build::generate();
     } else if cmd == "-V" {
         println!("Wingman - v{}", VERSION)
-    }else {
+    } else {
         println!(
             "{}\n{}",
             Style::new().bold().paint("Invalid Argument"),
@@ -47,14 +47,22 @@ fn main() {
     }
 
     fn print_help() {
-       
         // Future good use of a !
-        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b', -V for version"];
+        let help_array = vec![
+            "'--help' or '-h'",
+            "'new' or 'n'",
+            "'build' or 'b', -V for version",
+        ];
 
         for x in &help_array {
             println!("{}", x);
         }
 
-        println!("\n\n{}\n {} \n{}", Style::new().bold().paint("'new' flags:"), Style::new().italic().paint("--blog\n"), Style::new().italic().paint("post\n"));
+        println!(
+            "\n\n{}\n {} \n{}",
+            Style::new().bold().paint("'new' flags:"),
+            Style::new().italic().paint("--blog\n"),
+            Style::new().italic().paint("post\n")
+        );
     }
 }

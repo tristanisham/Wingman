@@ -101,7 +101,7 @@ pub mod markdown {
         <body>",
         );
         let mut placement = 0;
-        //gets number of posts 
+        //gets number of posts
         // Uses vec ID up by top of function
 
         // for _content in &files {
@@ -116,7 +116,6 @@ pub mod markdown {
             let str_plc: &str = &placement.to_string()[..];
             result.push_str(str_plc);
             result.push_str("\">\n");
-            
             placement += 1;
             result.push_str(&content);
             result.push_str("</article>");
