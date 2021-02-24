@@ -17,17 +17,20 @@ fn main() {
     }
 
     if cmd == "--help" || cmd == "-h" {
-        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b', -V for version"];
-
-        for x in &help_array {
-            println!("{}", x);
-        }
+        print_help();
     } else if cmd == "new" || cmd == "n" {
         if param == "" {
             new::seed("".to_string());
         } else if param == "--blog" {
             new::seed("blog".to_string())
+        } else if param == "post" {
+            new::post();
         } else {
+            println!(
+                "{}\n{}",
+                Style::new().bold().paint("Invalid Argument"),
+                Style::new().italic().paint("Here are available arguments:")
+            );
             print_help();
         }
     } else if cmd == "build" || cmd == "b" {
@@ -35,15 +38,16 @@ fn main() {
     } else if cmd == "-V" {
         println!("Wingman - v{}", VERSION)
     }else {
-        print_help();
-    }
-
-    fn print_help() {
         println!(
             "{}\n{}",
             Style::new().bold().paint("Invalid Argument"),
             Style::new().italic().paint("Here are available arguments:")
         );
+        print_help();
+    }
+
+    fn print_help() {
+       
         // Future good use of a !
         let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b', -V for version"];
 
@@ -51,6 +55,6 @@ fn main() {
             println!("{}", x);
         }
 
-        println!("\n\n{}\n {}", Style::new().bold().paint("'new' flags:"), Style::new().italic().paint("--blog\n"));
+        println!("\n\n{}\n {} \n{}", Style::new().bold().paint("'new' flags:"), Style::new().italic().paint("--blog\n"), Style::new().italic().paint("post\n"));
     }
 }

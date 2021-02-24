@@ -16,9 +16,18 @@ pub fn seed(param: String) {
     }
 }
 
+pub fn post() {
+    match make::post() {
+        Ok(_) => println!("New Post Generated"),
+        Err(e) => eprintln!("{}", e),
+    }
+}
+
 pub mod make {
     use crate::build::markdown;
     use crate::new;
+    use chrono::prelude::*;
+    use chrono::Utc;
     use std::fs;
     use std::fs::File;
 
@@ -46,6 +55,30 @@ pub mod make {
         }
 
         Ok(())
+    }
+
+    pub fn post() -> std::io::Result<()> {
+        let path = get_post_date(Utc::now());
+        File::create(path)?;
+        Ok(())
+    }
+    fn get_post_date(now: chrono::DateTime<Utc>) -> String {
+        let mut path = String::from("./bin/posts/");
+        path.push_str(&now.year().to_string());
+        path.push_str("-");
+        path.push_str(&now.month().to_string());
+        path.push_str("-");
+        path.push_str(&now.day().to_string());
+        path.push_str("-");
+        path.push_str(&now.hour().to_string());
+        path.push_str("-");
+        path.push_str(&now.minute().to_string());
+        path.push_str("-");
+        path.push_str(&now.second().to_string());
+        path.push_str(".md");
+
+        return path;
+
     }
 }
 
