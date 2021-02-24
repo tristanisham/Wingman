@@ -4,6 +4,7 @@ version = "0.0.7"
 authors = ["Tristan Isham <tristan@isham.co>"]
 edition = "2018"
 description = "Static site generator and theming engine."
+homepage = "https://wingman-rs.neocities.org/"
 license = "AGPL-3.0"
 readme = "readme.md"
 repository = "https://github.com/tristanisham/Wingman"
