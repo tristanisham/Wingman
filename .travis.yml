@@ -9,8 +9,8 @@ script:
 
 deploy:
   provider: releases
-  api_key: "ba4de115a8c28eb356c29b7a30b56816525d6cb7"
-  file: "target/release/wingman"
+  api_key: token
+  file: "./target/release/wingman"
   skip_cleanup: true
   on:
     tags: true
