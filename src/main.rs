@@ -49,5 +49,3 @@ fn main() {
         println!("\n\n{}\n {}", Style::new().bold().paint("'new' flags:"), Style::new().italic().paint("--blog\n"));
     }
 }
-
-//test
