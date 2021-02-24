@@ -5,6 +5,9 @@ use std::env;
 mod app;
 
 fn main() {
+    //Setup
+    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    //Start
     let args: Vec<String> = env::args().collect();
 
     let cmd = &args[1];
@@ -14,7 +17,7 @@ fn main() {
     }
 
     if cmd == "--help" || cmd == "-h" {
-        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b'"];
+        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b', -V for version"];
 
         for x in &help_array {
             println!("{}", x);
@@ -29,7 +32,9 @@ fn main() {
         }
     } else if cmd == "build" || cmd == "b" {
         build::generate();
-    } else {
+    } else if cmd == "-V" {
+        println!("Wingman - v{}", VERSION)
+    }else {
         print_help();
     }
 
@@ -40,7 +45,7 @@ fn main() {
             Style::new().italic().paint("Here are available arguments:")
         );
         // Future good use of a !
-        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b'"];
+        let help_array = vec!["'--help' or '-h'", "'new' or 'n'", "'build' or 'b', -V for version"];
 
         for x in &help_array {
             println!("{}", x);
