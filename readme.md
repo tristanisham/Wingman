@@ -1,6 +1,6 @@
 # Wingman
 ## Static site generator and theming engine
-Github hosts the nightly build. Stable is on [Crates](https://crates.io/crates/wingman).
+Github hosts the nightly build. Stable is on [Crates](https://crates.io/crates/wingman). | [Dev-blog (built with Wingman)](https://wingman-rs.neocities.org/)
 
 ### Commands
 * ```help``` generates a list of help commands and their short codes
