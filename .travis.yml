@@ -6,13 +6,13 @@ os:
 script:
   - cargo build --verbose --workspace
   - cargo test --verbose --workspace
-
+  - cargo b --release
 jobs:
   include:
   - stage: Github Release
     deploy:
       provider: releases
-      api_key: GITHUB_TOKEN=<token>
+      api_key: $token
       file: "./target/release/wingman"
       cleanup: true
       on:
