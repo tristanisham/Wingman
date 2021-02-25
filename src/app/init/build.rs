@@ -61,6 +61,7 @@ pub mod markdown {
         let mut result: String = "<!DOCTYPE html>
         <html lang=\"en\">
         <head>
+            <link rel=\"stylesheet\" href=\"styles.css\">
             <meta charset=\"UTF-8\">
             <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">
             <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
@@ -127,6 +128,11 @@ pub mod markdown {
         //OUTPUT AND BUILD FINALIZES
         let index = File::create("./bin/index.html")?;
         write_index(index, result)?;
+        let css = File::create("./bin/styles.css")?;
+        if seed["theme"].is_empty() || seed["theme"].is_null() || seed["theme"] == "default" {
+            write_style(css)?;
+        }
+        
         Ok(())
     }
 
@@ -143,6 +149,45 @@ pub mod markdown {
     fn write_index(mut file: File, string: String) -> std::io::Result<()> {
         let input = string.as_bytes();
         file.write_all(input)?;
+        Ok(())
+    }
+
+    fn write_style(mut file: File) -> std::io::Result<()> {
+        
+        let css = String::from("/* Desktop */
+
+        @media screen and (min-width: 800px) {
+            body {
+                background-color: #f0f0f0;
+            }
+            article {
+                padding-left: 20%;
+                padding-right: 20%;
+                padding-top: 5%;
+            }
+        }
+        
+        @media screen and (max-width: 799px) {
+            article {
+                padding: 2%;
+            }
+            
+        }
+        
+        @media screen {
+            
+            h1 {
+                font-size: 30pt;
+            }
+            p {
+                font-size: 16pt;
+                line-height: 2;
+            }
+        }");
+        
+
+        let cbyte = css.as_bytes();
+        file.write_all(cbyte)?;
         Ok(())
     }
 }

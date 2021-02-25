@@ -6,7 +6,6 @@ os:
 script:
   - cargo build --verbose --workspace
   - cargo test --verbose --workspace
-  - cargo b --release
 jobs:
   include:
   - stage: Github Release
