@@ -183,6 +183,9 @@ pub mod markdown {
                 font-size: 16pt;
                 line-height: 2;
             }
+            code {
+                font-size: 16pt;
+            }
         }");
         
 
