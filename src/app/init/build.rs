@@ -132,7 +132,6 @@ pub mod markdown {
         if seed["theme"].is_empty() || seed["theme"].is_null() || seed["theme"] == "default" {
             write_style(css)?;
         }
-        
         Ok(())
     }
 
@@ -153,41 +152,42 @@ pub mod markdown {
     }
 
     fn write_style(mut file: File) -> std::io::Result<()> {
-        
-        let css = String::from("/* Desktop */
+        let css = String::from(
+"/* Desktop */
 
-        @media screen and (min-width: 800px) {
-            body {
-                background-color: #f0f0f0;
-            }
-            article {
-                padding-left: 20%;
-                padding-right: 20%;
-                padding-top: 5%;
-            }
-        }
-        
-        @media screen and (max-width: 799px) {
-            article {
-                padding: 2%;
-            }
-            
-        }
-        
-        @media screen {
-            
-            h1 {
-                font-size: 30pt;
-            }
-            p {
-                font-size: 16pt;
-                line-height: 2;
-            }
-            code {
-                font-size: 16pt;
-            }
-        }");
-        
+@media screen and (min-width: 800px) {
+    body {
+        background-color: #f0f0f0;
+    }
+    article {
+        padding-left: 20%;
+        padding-right: 20%;
+        padding-top: 5%;
+    }
+}
+/* Mobile */
+@media screen and (max-width: 799px) {
+    article {
+        padding: 2%;
+    }
+}
+/* General */
+@media screen {
+    h1 {
+        font-size: 30pt;
+    }
+    p {
+        font-size: 16pt;
+        line-height: 2;
+    }
+    code {
+        font-size: 16pt;
+    }
+    li {
+        font-size: 16pt;
+    }
+}"
+        );
 
         let cbyte = css.as_bytes();
         file.write_all(cbyte)?;
