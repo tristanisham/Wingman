@@ -46,11 +46,13 @@ impl Plant {
     /// Takes a ```Path``` and builds a ```Plant```
     pub fn build_with_existing_seed(path: String) -> Self {
         let existing: Seed = Seed::build_from_config(path.as_str());
+
         Self {
             pot: path,
             seed: existing.make_json(),
             seed_struct: Some(existing),
         }
+        
     }
     /// Builds the final project.
     pub fn build(&self, flag: Option<&str>) -> std::io::Result<()> {
