@@ -19,13 +19,14 @@ fn main() {
     if cmd == "--help" || cmd == "-h" {
         print_help();
     } else if cmd == "new" || cmd == "n" {
-        let garden = Plant::new(param);
+        let garden = Plant::new(param, None);
         match garden.plant() {
             Ok(x) => println!("Yay! Your new Wingman site is located at {}", x),
             Err(e) => eprint!("{}", e),
         }
     } else if cmd == "build" || cmd == "b" {
-        //
+        todo!("Need to build the site still.");
+        let garden = Plant::build_with_existing_seed(param);
     } else if cmd == "-V" {
         println!("Wingman - v{}", VERSION)
     } else {
