@@ -1,8 +1,8 @@
 use ansi_term::Style;
-use app::init::{build, new};
+use forge::{plant::Plant};
 use std::env;
 
-mod app;
+mod forge;
 
 fn main() {
     //Setup
@@ -11,30 +11,21 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let cmd = &args[1];
-    let mut param: &String = &String::from("");
+    let mut param: String = "".to_string();
     if args.len() == 3usize {
-        param = &args[2];
+        param = args[2].to_owned();
     }
 
     if cmd == "--help" || cmd == "-h" {
         print_help();
     } else if cmd == "new" || cmd == "n" {
-        if param == "" {
-            new::seed("".to_string());
-        } else if param == "--blog" {
-            new::seed("blog".to_string())
-        } else if param == "post" {
-            new::post();
-        } else {
-            println!(
-                "{}\n{}",
-                Style::new().bold().paint("Invalid Argument"),
-                Style::new().italic().paint("Here are available arguments:")
-            );
-            print_help();
+        let garden = Plant::new(param);
+        match garden.plant() {
+            Ok(x) => println!("Yay! Your new Wingman site is located at {}", x),
+            Err(e) => eprint!("{}", e),
         }
     } else if cmd == "build" || cmd == "b" {
-        build::generate();
+        //
     } else if cmd == "-V" {
         println!("Wingman - v{}", VERSION)
     } else {
