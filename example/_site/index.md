@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="{{meta.keywords}}">
-    <meta name="description" content="{{meta.desc}}">
+    <meta name="keywords" content="">
+    <meta name="description" content="Weekly briefs on interesting developments in the world">
     <meta name="color-scheme" content="dark light">
-    <title>{{meta.title}}</title>
+    <title>The Brief</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/page.css">
-    {{!-- Pregenerated bullshit --}}
     <style>
         pre code.hljs {
             display: block;
@@ -127,18 +126,26 @@
             text-decoration: underline
         }
 
-        {{{css.GFM}}}
-        {{{css.KATEX}}}
+        
+        
 
     </style>
-    {{!-- End pregenerated bullshit --}}
 </head>
 
 <body>
-    {{> nav}}
+    <nav>
+        <div class="nav-title nav-item"><a href="/">The Brief</a></div>
+        <div class="nav-item"><a href="/archive.html">Archive</a></div>
+    </nav>
     <main class="container mx-auto">
         <article id="gnat-article" >
-            {{{body}}}
+            <hr />
+<h2>title: The Brief
+desc: Weekly briefs on interesting developments in the world</h2>
+<h1>Hello, World!</h1>
+<p>Welcome to <a href="https://thebrief.wtf/">The Brief</a>. A small, weekly brief highlighting interesting knowledge and <em>stuff I've learned</em> this week. Most of what I read now is programming related, but I have a healthy interest in plants, 3D printing, science fiction, and the history of writing.</p>
+<p>In this week's brief,</p>
+
         </article>
     </main>
     <script defer src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
