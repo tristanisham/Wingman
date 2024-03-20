@@ -1,9 +1,6 @@
 :root {
     --text: oklab(13.80% -0.010 -0.01);
     --background: oklab(98.91% -0.003 -0.00);
-
-
-
     --primary: oklab(67.69% -0.065 -0.07);
     --secondary: oklab(82.04% -0.042 -0.04);
     --accent: oklab(75.31% -0.057 -0.06);
@@ -14,7 +11,6 @@
     --radialPrimarySecondary: radial-gradient(oklab(67.69% -0.065 -0.07), oklab(82.04% -0.042 -0.04));
     --radialPrimaryAccent: radial-gradient(oklab(67.69% -0.065 -0.07), oklab(75.31% -0.057 -0.06));
     --radialSecondaryAccent: radial-gradient(oklab(82.04% -0.042 -0.04), oklab(75.31% -0.057 -0.06));
-
 }
 
 @media (prefers-color-scheme: dark) {
@@ -60,11 +56,28 @@ p {
     margin-right: auto;
 }
 
+
 body {
     font-family: 'Georgia', serif;
     color: var(--text);
     background-color: var(--background);
 }
+
+h1 {
+    font-size: xx-large !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Arial', serif;
+    font-weight: bold;
+}
+
+
 
 .container {
     display: flex;
@@ -73,10 +86,7 @@ body {
     align-items: center;
 }
 
-h1 {
-    font-size: 2em;
-    margin-bottom: 10px;
-}
+
 
 .anchor {
     color: inherit;
@@ -119,7 +129,7 @@ nav {
 
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-    #gnat-article {
+    #wm-article {
         max-width: 90%;
         /* Adjusted to be more responsive */
         padding-left: 2%;
@@ -131,7 +141,7 @@ nav {
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
-    #gnat-article {
+    #wm-article {
         max-width: 90%;
         /* Adjusted to be more responsive */
         padding-left: 5%;
@@ -143,7 +153,7 @@ nav {
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
-    #gnat-article {
+    #wm-article {
         max-width: 90%;
         /* Adjusted to be more responsive */
         padding-left: 10%;
@@ -155,7 +165,7 @@ nav {
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
-    #gnat-article {
+    #wm-article {
         max-width: 90%;
         /* Adjusted to be more responsive */
         padding-left: 15%;
@@ -167,7 +177,7 @@ nav {
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
-    #gnat-article {
+    #wm-article {
         max-width: 90%;
         /* Adjusted to be more responsive */
         padding-left: 20%;

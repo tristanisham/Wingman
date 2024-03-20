@@ -20,6 +20,11 @@ pub enum Command {
         /// Enable the filewatcher to build your site as you modify your sourcecode.
         #[arg(short, long)]
         watch: bool,
-    }
+    },
+    /// Serve your site on a production web server.
+    Serve {
+        /// Set's the port for your server. Defaults to 3030.
+        #[arg(short, long, default_value="3030")]
+        port: u16,
+    },
 }
-

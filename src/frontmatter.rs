@@ -1,16 +1,17 @@
+use gray_matter::{engine::YAML, Matter};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Frontmatter {
     pub meta: Meta,
-    pub body: String,
+    pub content: String,
 }
 
 #[derive(Serialize, PartialEq, Deserialize, Debug, Default)]
 pub struct Meta {
     pub title: String,
     pub desc: Option<String>,
-    pub keywords: Option<String>,
+    pub keywords: Option<Vec<String>>,
 }
 
 impl Frontmatter {
@@ -22,29 +23,16 @@ impl Frontmatter {
     }
 
     fn extract(&mut self, data: &str) -> anyhow::Result<()> {
-        let mut switch = false;
-        let mut buff = String::new();
-        let mut count: i8 = 0;
-        let mut body_line: usize = 0;
-        for (i, line) in data.lines().into_iter().enumerate() {
-            if count > 2 {
-                body_line = i;
-                break;
-            }
-            if line == "---" {
-                count += 1;
-                switch = !switch;
-                continue;
-            }
+        let matter = Matter::<YAML>::new();
+        let result = matter.parse(data);
 
-            if switch {
-                buff.push_str(&format!("{line}\n"));
-            }
+        if let Some(data) = result.data {
+            let meta: Meta = data.deserialize()?;
+            self.meta = meta;
         }
 
-        let meta: Meta = serde_yaml::from_str(&buff)?;
-        self.meta = meta;
-        self.body = String::from(&data[body_line..data.len()]);
+        self.content = result.content;
+
         Ok(())
     }
 }

@@ -6,13 +6,13 @@ edition = "2021"
 description = "Static site generator and theming engine."
 homepage = "https://wingman-rs.neocities.org/"
 license = "MIT"
-readme = "readme.md"
+readme = "README.md"
 repository = "https://github.com/tristanisham/Wingman"
 keywords = [
     "static site generator",
     "command line tool",
     "web tool",
-    "Build-Tools",
+    "Build-Tools", 
     "web-dev",
     "cli",
 ]
@@ -35,3 +35,10 @@ rayon = "1.9.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9.33"
 handlebars = "5.1.0"
+tokio = { version = "1", features = ["full"] }
+axum = "0.7.4"
+tower-http = { version = "0.5.2", features = ["fs", "trace"] }
+gray_matter = "0.2.6"
+ansi_term = "0.12.1"
+walkdir = "2.5.0"
+thiserror = "1.0.58"

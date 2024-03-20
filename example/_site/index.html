@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="{{meta.keywords}}">
-    <meta name="description" content="{{meta.desc}}">
+    <meta name="keywords" content="">
+    <meta name="description" content="A website engine designed to get you published">
     <meta name="color-scheme" content="dark light">
-    <title>{{meta.title}}</title>
+    <title>Wingman</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/static/page.css">
-    {{!-- Pregenerated bullshit --}}
     <style>
         pre code.hljs {
             display: block;
@@ -130,14 +129,41 @@
 
 
     </style>
-    {{!-- End pregenerated bullshit --}}
 </head>
 
 <body>
-    {{> nav}}
+    <nav>
+        <div class="nav-title nav-item"><a href="/">Wingman</a></div>
+</nav>
     <main class="container mx-auto">
         <article id="wm-article" >
-            {{{content}}}
+            <h1>Welcome to Wingman</h1>
+<p>Wingman is a website engine and generator written in Rust. With Wingman, you can create a new Markdown-based website in seconds, customize every inch with vanilla HTML, CSS, and JavaScript, and serve or build your site for the world.</p>
+<p>Here is what an initial Wingman project's directory looks like.</p>
+<pre><code class="language-bash">example/
+    _site
+        index.html
+        static
+           page.css
+    templates
+        page.hbs
+        partials
+           nav.hbs
+    www
+       index.md
+       static
+           page.css
+
+8 directories, 11 files
+</code></pre>
+<p>You can create a new project anytime by running <code>wingman init</code>. The <code>-f</code> flag forces Wingman to overwrite already existing files. If there are files already in your target directory, try: <code>wingman init -f</code>.</p>
+<p>There are three important directories in every Wingman project. The <code>_site</code> out dir, this is where Wingman write your production builds. You can serve the root of this folder to see your website. Wingman comes with a built-in development web server.</p>
+<pre><code class="language-bash">wingman serve --port 3030
+# --port is optional. Without it, Wingman will default to port 3030.
+wingman serve
+</code></pre>
+<p>The <code>templates</code> dir hosts your site's template files. Modify these to modify the core structure of your site. Be warned.</p>
+
         </article>
     </main>
     <script type="module">
