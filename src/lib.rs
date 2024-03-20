@@ -63,7 +63,48 @@ impl Default for Wingman<'_> {
         let router: axum::Router<()> =
             axum::Router::new().nest_service("/", ServeDir::new(&out_path));
 
-        let mut engine = Handlebars::new();
+
+        // We could make these optional. Just warn users or something.
+
+        // I hate having to clone shit.
+        // Makes sense though since the originals are about to drop.
+        Self {
+            sourcecode: source_path.clone(),
+            target: out_path.clone(),
+            settings: Settings::new(),
+            router,
+            engine: Handlebars::new(),
+        }
+    }
+}
+
+impl Wingman<'_> {
+    /// Starts development webserver for Wingman project.
+    pub async fn serve(self, port: &u16) -> anyhow::Result<()> {
+        if !self.target.exists() {
+            return Err(
+                anyhow!(WingmanError::InputNotExist(self.target.to_path_buf())).context(format!(
+                    "Cannot serve nonexistant directory. ({})",
+                    self.target.display()
+                )),
+            );
+        }
+
+        let addr = SocketAddr::from(([127, 0, 0, 1], *port));
+        let listener = tokio::net::TcpListener::bind(addr).await?;
+        println!("Serving on http://localhost:{}", port);
+        axum::serve(listener, self.router.layer(TraceLayer::new_for_http())).await?;
+        Ok(())
+    }
+
+    pub fn init(&mut self, force: bool) -> anyhow::Result<()> {
+        let cwd = crate::cwd();
+        if !is_empty(&cwd) && !force {
+            return Err(anyhow!("Dir is full, and no --force flag passed"));
+        }
+
+        self.create_project_structure()?;
+
         let target_dir = crate::cwd().join("templates");
         if target_dir.exists() {
             let mut paths: Vec<PathBuf> = vec![];
@@ -89,14 +130,16 @@ impl Default for Wingman<'_> {
                     .unwrap_or_default();
                 // We could make these optional. Just warn users or something.
                 if entry.starts_with(&target_dir.join("partials")) {
-                    assert!(engine
+                    assert!(&self
+                        .engine
                         .register_partial(
                             &name,
                             fs::read_to_string(&entry).expect("Failed to load partial {name}")
                         )
                         .is_ok());
                 } else {
-                    assert!(engine
+                    assert!(&self
+                        .engine
                         .register_template_string(
                             &name,
                             fs::read_to_string(&entry).expect("Failed to load template {name}")
@@ -105,46 +148,6 @@ impl Default for Wingman<'_> {
                 }
             }
         }
-        // We could make these optional. Just warn users or something.
-
-        // I hate having to clone shit.
-        // Makes sense though since the originals are about to drop.
-        Self {
-            sourcecode: source_path.clone(),
-            target: out_path.clone(),
-            settings: Settings::new(),
-            router,
-            engine,
-        }
-    }
-}
-
-impl Wingman<'_> {
-    /// Starts development webserver for Wingman project.
-    pub async fn serve(self, port: &u16) -> anyhow::Result<()> {
-        if !self.target.exists() {
-            return Err(
-                anyhow!(WingmanError::InputNotExist(self.target.to_path_buf())).context(format!(
-                    "Cannot serve nonexistant directory. ({})",
-                    self.target.display()
-                )),
-            );
-        }
-
-        let addr = SocketAddr::from(([127, 0, 0, 1], *port));
-        let listener = tokio::net::TcpListener::bind(addr).await?;
-        println!("Serving on http://localhost:{}", port);
-        axum::serve(listener, self.router.layer(TraceLayer::new_for_http())).await?;
-        Ok(())
-    }
-
-    pub fn init(&self, force: bool) -> anyhow::Result<()> {
-        let cwd = crate::cwd();
-        if !is_empty(&cwd) && !force {
-            return Err(anyhow!("Dir is full, and no --force flag passed"));
-        }
-
-        self.create_project_structure()?;
         Ok(())
     }
 
@@ -155,9 +158,9 @@ impl Wingman<'_> {
         fs::create_dir_all(&cwd.join("templates").join("partials"))?;
         fs::create_dir_all(&cwd.join(&self.target).join("static"))?;
 
-        let page_tmpl = include_str!("../example/templates/page.hbs");
-        let nav_partial = include_str!("../example/templates/partials/nav.hbs");
-        let page_css = include_str!("../example/www/static/page.css");
+        let page_tmpl = include_str!("../templates/page.hbs");
+        let nav_partial = include_str!("../templates/partials/nav.hbs");
+        let page_css = include_str!("../templates/static/page.css");
 
         fs::write(&cwd.join("templates/page.hbs"), page_tmpl)?;
         fs::write(&cwd.join("templates/partials/nav.hbs"), nav_partial)?;
