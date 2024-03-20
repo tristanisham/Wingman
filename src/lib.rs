@@ -45,14 +45,15 @@ impl Settings {
 }
 
 #[derive(Debug)]
-pub struct Wingman {
+pub struct Wingman<'a> {
     sourcecode: PathBuf,
     target: PathBuf,
     pub settings: Settings,
     router: axum::Router,
+    engine: Handlebars<'a>,
 }
 
-impl Default for Wingman {
+impl Default for Wingman<'_> {
     fn default() -> Self {
         let cwd = crate::cwd();
         let srcpth = Path::new("www");
@@ -62,6 +63,50 @@ impl Default for Wingman {
         let router: axum::Router<()> =
             axum::Router::new().nest_service("/", ServeDir::new(&out_path));
 
+        let mut engine = Handlebars::new();
+        let target_dir = crate::cwd().join("templates");
+        if target_dir.exists() {
+            let mut paths: Vec<PathBuf> = vec![];
+
+            for entry in walkdir::WalkDir::new(&target_dir)
+                .into_iter()
+                .filter_map(|e| e.ok())
+            {
+                if entry
+                    .path()
+                    .extension()
+                    .is_some_and(|x| x == "hbs" || x == "handlebars")
+                {
+                    paths.push(entry.path().to_path_buf())
+                }
+            }
+
+            for entry in paths {
+                let name = entry
+                    .file_stem()
+                    .unwrap_or_default()
+                    .to_str()
+                    .unwrap_or_default();
+                // We could make these optional. Just warn users or something.
+                if entry.starts_with(&target_dir.join("partials")) {
+                    assert!(engine
+                        .register_partial(
+                            &name,
+                            fs::read_to_string(&entry).expect("Failed to load partial {name}")
+                        )
+                        .is_ok());
+                } else {
+                    assert!(engine
+                        .register_template_string(
+                            &name,
+                            fs::read_to_string(&entry).expect("Failed to load template {name}")
+                        )
+                        .is_ok());
+                }
+            }
+        }
+        // We could make these optional. Just warn users or something.
+
         // I hate having to clone shit.
         // Makes sense though since the originals are about to drop.
         Self {
@@ -69,18 +114,21 @@ impl Default for Wingman {
             target: out_path.clone(),
             settings: Settings::new(),
             router,
+            engine,
         }
     }
 }
 
-impl Wingman {
+impl Wingman<'_> {
     /// Starts development webserver for Wingman project.
     pub async fn serve(self, port: &u16) -> anyhow::Result<()> {
         if !self.target.exists() {
-            return Err(anyhow!(
-                "Cannot serve nonexistant directory. ({})",
-                self.target.display()
-            ));
+            return Err(
+                anyhow!(WingmanError::InputNotExist(self.target.to_path_buf())).context(format!(
+                    "Cannot serve nonexistant directory. ({})",
+                    self.target.display()
+                )),
+            );
         }
 
         let addr = SocketAddr::from(([127, 0, 0, 1], *port));
@@ -118,7 +166,7 @@ impl Wingman {
         Ok(())
     }
 
-    pub fn build(&self, watch: bool) -> anyhow::Result<()> {
+    pub fn build(&mut self, watch: bool) -> anyhow::Result<()> {
         if watch {
             println!("Watching ./www for changes");
             let (tx, rx) = std::sync::mpsc::channel();
@@ -136,7 +184,7 @@ impl Wingman {
                         | notify::EventKind::Remove(_) => {
                             for path in event.paths {
                                 // println!("Rendering {}", &path.display());
-                                if let Err(e) = Self::render_file(path) {
+                                if let Err(e) = self.render_file(path) {
                                     match e.downcast_ref::<WingmanError>() {
                                         // This might not work? When I run tests, it prints regardless.
                                         Some(WingmanError::InputNotExist(_))
@@ -156,7 +204,7 @@ impl Wingman {
             for entry in walkdir::WalkDir::new(&self.sourcecode) {
                 let entry = entry?;
                 if entry.path().is_file() {
-                    if let Err(e) = Self::render_file(entry.path()) {
+                    if let Err(e) = self.render_file(entry.path()) {
                         eprintln!("{e}");
                     }
                 }
@@ -165,7 +213,7 @@ impl Wingman {
         Ok(())
     }
 
-    fn render_file<'i, P: AsRef<Path>>(p: P) -> anyhow::Result<()> {
+    fn render_file<P: AsRef<Path>>(&mut self, p: P) -> anyhow::Result<()> {
         if !p.as_ref().exists() {
             return Err(anyhow!(WingmanError::InputNotExist(PathBuf::from(
                 p.as_ref().to_string_lossy().to_string()
@@ -197,19 +245,7 @@ impl Wingman {
             let html = markdown_to_html(&fm.content, &html_opts);
             fm.content = html;
 
-            // create the handlebars registry
-            let mut handlebars = Handlebars::new();
-
-            // We could make these optional. Just warn users or something.
-            assert!(handlebars
-                .register_template_string("page", include_str!("../example/templates/page.hbs"))
-                .is_ok());
-
-            assert!(handlebars
-                .register_partial("nav", include_str!("../example/templates/partials/nav.hbs"))
-                .is_ok());
-
-            let out = handlebars.render("page", &fm)?;
+            let out = self.engine.render("page", &fm)?;
 
             if !destination_pb.set_extension("html") {
                 let msg = format!(

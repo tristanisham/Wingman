@@ -37,4 +37,4 @@ wingman serve --port 3030
 wingman serve
 ```
 
-The `templates` dir hosts your site's template files. Modify these to modify the core structure of your site. Be warned. 
+The `templates` dir hosts your site's template files. Modify these to modify the core structure of your site. 

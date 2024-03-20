@@ -6,7 +6,7 @@ mod cli;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
-    let wm = Wingman::default();
+    let mut wm = Wingman::default();
 
     match &args.command {
         Some(cli::Command::Init { force }) => wm.init(*force)?,
