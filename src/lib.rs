@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use comrak::{markdown_to_html, Options};
 use frontmatter::Frontmatter;
 use handlebars::Handlebars;
-use notify::{Event, RecursiveMode, Watcher};
+use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use std::{
     env, fs,
@@ -89,7 +89,13 @@ impl Wingman {
 
     pub fn build(&self, watch: bool) -> anyhow::Result<()> {
         if watch {
-            let mut watcher = notify::recommended_watcher(|res: notify::Result<Event>| {
+            println!("Watch enabled");
+            let (tx, rx) = std::sync::mpsc::channel();
+            let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
+
+            watcher.watch(&self.sourcecode, RecursiveMode::Recursive)?;
+
+            for res in rx {
                 match res {
                     Ok(event) => match event.kind {
                         // notify::EventKind::Any => todo!(),
@@ -98,6 +104,7 @@ impl Wingman {
                         | notify::EventKind::Modify(_)
                         | notify::EventKind::Remove(_) => {
                             for path in event.paths {
+                                println!("Rendering {}", &path.display());
                                 if let Err(e) = Self::render_file(path) {
                                     eprintln!("{e}");
                                 }
@@ -108,9 +115,9 @@ impl Wingman {
                     },
                     Err(e) => eprintln!("watch error: {:?}", e),
                 }
-            })?;
-
-            watcher.watch(&self.sourcecode, RecursiveMode::Recursive)?;
+            }
+        } else {
+            todo!("Nothing to see here, yet!")
         }
         Ok(())
     }
@@ -118,7 +125,7 @@ impl Wingman {
     fn render_file<P: AsRef<Path>>(p: P) -> anyhow::Result<()> {
         if !p.as_ref().exists() {
             return Err(anyhow!("File {} doesn't exist", p.as_ref().display()));
-        } else if p.as_ref().is_file() {
+        } else if !p.as_ref().is_file() {
             return Err(anyhow!("Path must be a file: {}", p.as_ref().display()));
         }
 
@@ -129,9 +136,32 @@ impl Wingman {
         fm.body = html;
         // create the handlebars registry
         let mut handlebars = Handlebars::new();
-        assert!(handlebars.register_template_string("page", include_str!("../example/templates/page.hbs")).is_ok());
+
+        // We could make these optional. Just warn users or something.
+        assert!(handlebars
+            .register_template_string("page", include_str!("../example/templates/page.hbs"))
+            .is_ok());
+
+        assert!(handlebars
+            .register_partial("nav", include_str!("../example/templates/partials/nav.hbs"))
+            .is_ok());
+
+        // println!("{:#?}", fm);
+
         let out = handlebars.render("page", &fm)?;
-        fs::write(p, out)?;
+        let cwd = crate::cwd();
+
+        let www = &cwd.join("www");
+        let site = &cwd.join("_site");
+
+        let destination_pb = PathBuf::from(p.as_ref().to_string_lossy().to_string().replacen(
+            &www.to_string_lossy().to_string(),
+            &site.to_string_lossy().to_string(),
+            1,
+        ));
+
+        fs::write(destination_pb, out)?;
+
         Ok(())
     }
 }
