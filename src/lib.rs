@@ -1,7 +1,8 @@
 use anyhow::anyhow;
 use comrak::{markdown_to_html, Options};
 use frontmatter::Frontmatter;
-use notify::{Event, RecommendedWatcher, RecursiveMode, Result, Watcher};
+use handlebars::Handlebars;
+use notify::{Event, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use std::{
     env, fs,
@@ -95,7 +96,13 @@ impl Wingman {
                         notify::EventKind::Access(_)
                         | notify::EventKind::Create(_)
                         | notify::EventKind::Modify(_)
-                        | notify::EventKind::Remove(_) => for path in event.paths {},
+                        | notify::EventKind::Remove(_) => {
+                            for path in event.paths {
+                                if let Err(e) = Self::render_file(path) {
+                                    eprintln!("{e}");
+                                }
+                            }
+                        }
                         // notify::EventKind::Other => todo!(),
                         _ => {}
                     },
@@ -116,9 +123,15 @@ impl Wingman {
         }
 
         let file = fs::read_to_string(&p)?;
-        let fm = Frontmatter::new(&file)?;
-        
+        let mut fm = Frontmatter::new(&file)?;
 
+        let html = markdown_to_html(&fm.body, &Options::default());
+        fm.body = html;
+        // create the handlebars registry
+        let mut handlebars = Handlebars::new();
+        assert!(handlebars.register_template_string("page", include_str!("../example/templates/page.hbs")).is_ok());
+        let out = handlebars.render("page", &fm)?;
+        fs::write(p, out)?;
         Ok(())
     }
 }
