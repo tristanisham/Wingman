@@ -1,23 +1,37 @@
 [package]
 name = "wingman"
-version = "0.0.12"
+version = "0.1.0"
 authors = ["Tristan Isham <tristan@isham.co>"]
-edition = "2018"
+edition = "2021"
 description = "Static site generator and theming engine."
 homepage = "https://wingman-rs.neocities.org/"
-license = "AGPL-3.0"
+license = "MIT"
 readme = "readme.md"
 repository = "https://github.com/tristanisham/Wingman"
-keywords = ["Gopher", "Gemini", "binary", "Build-Tools", "web-dev"]
-categories = ["command-line-utilities", "command-line-interface", "development-tools", "web-programming"]
+keywords = [
+    "static site generator",
+    "command line tool",
+    "web tool",
+    "Build-Tools",
+    "web-dev",
+    "cli",
+]
+categories = [
+    "command-line-utilities",
+    "command-line-interface",
+    "development-tools",
+    "web-programming",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ansi_term = "0.12.1"
-json = "0.12.4"
-pulldown-cmark = "0.8.0"
-chrono = "0.4.19"
-# regex = "1.4.3"
+notify = { version = "6.1.1" }
+anyhow = "1.0.81"
+clap = { version = "4.5.3", features = ["unicode", "derive"] }
+comrak = "0.21.0"
+lightningcss = "1.0.0-alpha.55"
+rayon = "1.9.0"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.64"
+serde_yaml = "0.9.33"
+handlebars = "5.1.0"

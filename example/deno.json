@@ -1,0 +1,17 @@
+{
+  "tasks": {
+    "dev": "deno run -A --watch main.ts",
+    "serve": "deno run -A --watch main.ts --serve 8080",
+    "build": "deno run -A main.ts --build",
+    "watch": "deno run -A --watch main.ts --watch"
+  },
+  "imports": {
+    "@deno/gfm": "jsr:@deno/gfm@^0.8.0",
+    "@oak/oak": "jsr:@oak/oak@^14.2.0",
+    "@std/cli": "jsr:@std/cli@^0.220.1",
+    "@std/fmt": "jsr:@std/fmt@^0.220.1",
+    "@std/front-matter": "jsr:@std/front-matter@^0.220.1",
+    "@std/fs": "jsr:@std/fs@^0.220.1",
+    "@std/path": "jsr:@std/path@^0.220.1"
+  }
+}

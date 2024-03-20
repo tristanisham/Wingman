@@ -1,0 +1,178 @@
+:root {
+    --text: oklab(13.80% -0.010 -0.01);
+    --background: oklab(98.91% -0.003 -0.00);
+
+
+
+    --primary: oklab(67.69% -0.065 -0.07);
+    --secondary: oklab(82.04% -0.042 -0.04);
+    --accent: oklab(75.31% -0.057 -0.06);
+
+    --linearPrimarySecondary: linear-gradient(oklab(67.69% -0.065 -0.07), oklab(82.04% -0.042 -0.04));
+    --linearPrimaryAccent: linear-gradient(oklab(67.69% -0.065 -0.07), oklab(75.31% -0.057 -0.06));
+    --linearSecondaryAccent: linear-gradient(oklab(82.04% -0.042 -0.04), oklab(75.31% -0.057 -0.06));
+    --radialPrimarySecondary: radial-gradient(oklab(67.69% -0.065 -0.07), oklab(82.04% -0.042 -0.04));
+    --radialPrimaryAccent: radial-gradient(oklab(67.69% -0.065 -0.07), oklab(75.31% -0.057 -0.06));
+    --radialSecondaryAccent: radial-gradient(oklab(82.04% -0.042 -0.04), oklab(75.31% -0.057 -0.06));
+
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: oklab(99.11% 0.000 0.00);
+        --background: oklab(0.00% 0.000 0.00);
+        --primary: oklab(67.46% -0.064 -0.07);
+        --secondary: oklab(82.10% -0.041 -0.04);
+        --accent: oklab(75.35% -0.057 -0.06);
+
+        --linearPrimarySecondary: linear-gradient(oklab(67.46% -0.064 -0.07), oklab(82.10% -0.041 -0.04));
+        --linearPrimaryAccent: linear-gradient(oklab(67.46% -0.064 -0.07), oklab(75.35% -0.057 -0.06));
+        --linearSecondaryAccent: linear-gradient(oklab(82.10% -0.041 -0.04), oklab(75.35% -0.057 -0.06));
+        --radialPrimarySecondary: radial-gradient(oklab(67.46% -0.064 -0.07), oklab(82.10% -0.041 -0.04));
+        --radialPrimaryAccent: radial-gradient(oklab(67.46% -0.064 -0.07), oklab(75.35% -0.057 -0.06));
+        --radialSecondaryAccent: radial-gradient(oklab(82.10% -0.041 -0.04), oklab(75.35% -0.057 -0.06));
+
+    }
+
+}
+
+.anchor>svg {
+    stroke: var(--text);
+    fill: var(--text);
+}
+
+p {
+    line-height: calc(1ex / 0.32);
+    width: 60ch;
+    font-size: large;
+    max-width: 100%;
+}
+
+@supports (font-size-adjust: 1) {
+    article {
+        font-size-adjust: 0.5;
+    }
+}
+
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body {
+    font-family: 'Georgia', serif;
+    color: var(--text);
+    background-color: var(--background);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.anchor {
+    color: inherit;
+    text-decoration: none;
+}
+
+.anchor:hover {
+    color: var(--accent);
+}
+
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
+nav {
+    padding: 0 2rem 0 2rem;
+    color: var(--text);
+    background: var(--background);
+    display: flex;
+    flex-direction: row;
+
+    & .nav-title {
+        color: var(--primary);
+        text-decoration: inherit;
+    }
+
+    & .nav-item {
+        text-decoration: underline;
+        font-size: larger;
+        padding-right: 1rem;
+    }
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    #gnat-article {
+        max-width: 90%;
+        /* Adjusted to be more responsive */
+        padding-left: 2%;
+        /* Reduced padding for smaller screens */
+        padding-right: 2%;
+        /* Reduced padding for smaller screens */
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    #gnat-article {
+        max-width: 90%;
+        /* Adjusted to be more responsive */
+        padding-left: 5%;
+        /* Adjusted padding for better spacing */
+        padding-right: 5%;
+        /* Adjusted padding for better spacing */
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    #gnat-article {
+        max-width: 90%;
+        /* Adjusted to be more responsive */
+        padding-left: 10%;
+        /* Adjusted padding for better spacing */
+        padding-right: 10%;
+        /* Adjusted padding for better spacing */
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    #gnat-article {
+        max-width: 90%;
+        /* Adjusted to be more responsive */
+        padding-left: 15%;
+        /* Adjusted padding for better spacing */
+        padding-right: 15%;
+        /* Adjusted padding for better spacing */
+    }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    #gnat-article {
+        max-width: 90%;
+        /* Adjusted to be more responsive */
+        padding-left: 20%;
+        /* Adjusted padding for better spacing */
+        padding-right: 20%;
+        /* Adjusted padding for better spacing */
+    }
+}
