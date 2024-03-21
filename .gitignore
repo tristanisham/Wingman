@@ -1,5 +1,5 @@
 /target
-example/
+/example
 .vscode
 toot
 node_modules
