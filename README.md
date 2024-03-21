@@ -27,4 +27,16 @@ Open up your terminal and create a new empty directory. Then, run:
 wingman init -f # In a nonempty directory, use `-f` to force initialize a new Wingman project.
 ```
 
+Build your website with:
+```sh
+wingman build
+```
+Or rebuild on file change:
+```sh
+wingman build --watch
+```
 
+View your website locally.
+```sh
+wingman serve --port 3030 # The port flag is option. Wingman defaults to port 3030.
+```

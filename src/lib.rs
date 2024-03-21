@@ -134,7 +134,12 @@ impl Wingman<'_> {
     }
 
     pub async fn build(&mut self, watch: bool) -> anyhow::Result<()> {
+        if !&self.sourcecode.exists() || !self.target.exists() {
+            return Err(anyhow!("Directories ./www and ./_site weren't found."));
+        }
+
         if watch {
+            self.reload_engine();
             println!("Watching ./www for changes");
             let (tx, rx) = std::sync::mpsc::channel();
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
@@ -150,18 +155,20 @@ impl Wingman<'_> {
                         | notify::EventKind::Modify(_)
                         | notify::EventKind::Remove(_) => {
                             for path in event.paths {
-                                if path.extension().is_some_and(|x| x == "hbs" || x == "handlebars") {
-                                    self.reload_engine();
-                                }
                                 // println!("Rendering {}", &path.display());
                                 if let Err(e) = &self.render_file(path).await {
                                     match e.downcast_ref::<WingmanError>() {
                                         // This might not work? When I run tests, it prints regardless.
                                         Some(WingmanError::InputNotExist(_))
                                         | Some(WingmanError::InputNotFile(_)) => continue,
-                                        _ => eprintln!("{}", Color::Red.paint(e.to_string())),
+                                        _ => eprintln!(
+                                            "{:#?}: {}",
+                                            &event.kind,
+                                            Color::Red.paint(e.to_string())
+                                        ),
                                     }
                                 }
+                                self.reload_engine();
                             }
                         }
                         // notify::EventKind::Other => todo!(),
@@ -257,6 +264,10 @@ impl Wingman<'_> {
                 return Err(anyhow!(msg));
             }
 
+            if let Some(parent) = destination_pb.parent() {
+                fs::create_dir_all(parent)?;
+            }
+
             fs::write(&destination_pb, out)?;
             let mut style = Color::White.normal();
             style.background = Some(Color::Red);
@@ -279,6 +290,12 @@ impl Wingman<'_> {
                     ..Default::default()
                 })
                 .unwrap();
+
+
+            if let Some(parent) = destination_pb.parent() {
+                fs::create_dir_all(parent)?;
+            }
+
             fs::write(&destination_pb, res.code)?;
             let mut style = Color::White.normal();
             style.background = Some(Color::Blue);
@@ -291,7 +308,7 @@ impl Wingman<'_> {
 
     fn reload_engine(&mut self) {
         // BUG: Just realized that if you add a new template or partial after starting the program, Wingman won't refresh
-        // HBS and it'll have to be restarted. 
+        // HBS and it'll have to be restarted.
         let target_dir = crate::cwd().join("templates");
         if target_dir.exists() {
             let mut paths: Vec<PathBuf> = vec![];
