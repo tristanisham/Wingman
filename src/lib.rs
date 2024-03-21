@@ -12,6 +12,8 @@ use std::{
     path::{Path, PathBuf},
 };
 use thiserror::Error;
+
+use std::time::Instant;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 mod frontmatter;
 
@@ -62,7 +64,6 @@ impl Default for Wingman<'_> {
 
         let router: axum::Router<()> =
             axum::Router::new().nest_service("/", ServeDir::new(&out_path));
-
 
         // We could make these optional. Just warn users or something.
 
@@ -169,7 +170,7 @@ impl Wingman<'_> {
         Ok(())
     }
 
-    pub fn build(&mut self, watch: bool) -> anyhow::Result<()> {
+    pub async fn build(&self, watch: bool) -> anyhow::Result<()> {
         if watch {
             println!("Watching ./www for changes");
             let (tx, rx) = std::sync::mpsc::channel();
@@ -187,7 +188,7 @@ impl Wingman<'_> {
                         | notify::EventKind::Remove(_) => {
                             for path in event.paths {
                                 // println!("Rendering {}", &path.display());
-                                if let Err(e) = self.render_file(path) {
+                                if let Err(e) = &self.render_file(path).await {
                                     match e.downcast_ref::<WingmanError>() {
                                         // This might not work? When I run tests, it prints regardless.
                                         Some(WingmanError::InputNotExist(_))
@@ -204,19 +205,48 @@ impl Wingman<'_> {
                 }
             }
         } else {
+            let start = Instant::now();
+            let mut handles = vec![];
             for entry in walkdir::WalkDir::new(&self.sourcecode) {
                 let entry = entry?;
+                let e_path = entry.path().to_path_buf();
                 if entry.path().is_file() {
-                    if let Err(e) = self.render_file(entry.path()) {
-                        eprintln!("{e}");
-                    }
+                    let handle = self.render_file(e_path);
+                    handles.push(handle);
+                    //     if let Err(e) = self.render_file(entry.path()).await {
+                    //         eprintln!("{e}");
+                    //     }
                 }
             }
+
+            let results = futures::future::join_all(handles).await;
+            let count = results.len();
+
+            // `results` is now a vector of the results of each future.
+            // You can iterate over it and handle each result as needed.
+            for result in results {
+                match result {
+                    Ok(_) => {}
+                    Err(e) => match e.downcast_ref::<WingmanError>() {
+                        // This might not work? When I run tests, it prints regardless.
+                        Some(WingmanError::InputNotExist(_))
+                        | Some(WingmanError::InputNotFile(_)) => continue,
+                        _ => eprintln!("{}", Color::Red.paint(e.to_string())),
+                    },
+                }
+            }
+
+            let elapsed = Instant::now().duration_since(start);
+            println!(
+                "Built {} files in {:?}",
+                Color::Cyan.paint(count.to_string()),
+                elapsed
+            )
         }
         Ok(())
     }
 
-    fn render_file<P: AsRef<Path>>(&mut self, p: P) -> anyhow::Result<()> {
+    async fn render_file<P: AsRef<Path>>(&self, p: P) -> anyhow::Result<()> {
         if !p.as_ref().exists() {
             return Err(anyhow!(WingmanError::InputNotExist(PathBuf::from(
                 p.as_ref().to_string_lossy().to_string()

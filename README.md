@@ -12,3 +12,6 @@ Commands:
 Options:
   -h, --help     Print help
   -V, --version  Print version
+
+## About
+Wingman is a command line tool and library for people who want to make a website. It combines a CSS abstraction layer powered by [Lightning CSS](https://lightningcss.dev/), 

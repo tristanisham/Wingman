@@ -10,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
 
     match &args.command {
         Some(cli::Command::Init { force }) => wm.init(*force)?,
-        Some(cli::Command::Build { watch }) => wm.build(*watch)?,
+        Some(cli::Command::Build { watch }) => wm.build(*watch).await?,
         Some(cli::Command::Serve { port }) => wm.serve(port).await?,
         None => {}
     }
