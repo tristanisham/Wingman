@@ -9,9 +9,8 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/tristanisham/Wingman"
 keywords = [
-    "web tool",
-    "static site generator",
-    "web framework",
+    "web",
+    "framework",
     "Build-Tools", 
     "cli",
 ]
