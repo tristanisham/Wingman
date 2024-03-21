@@ -105,50 +105,7 @@ impl Wingman<'_> {
         }
 
         self.create_project_structure()?;
-
-        let target_dir = crate::cwd().join("templates");
-        if target_dir.exists() {
-            let mut paths: Vec<PathBuf> = vec![];
-
-            for entry in walkdir::WalkDir::new(&target_dir)
-                .into_iter()
-                .filter_map(|e| e.ok())
-            {
-                if entry
-                    .path()
-                    .extension()
-                    .is_some_and(|x| x == "hbs" || x == "handlebars")
-                {
-                    paths.push(entry.path().to_path_buf())
-                }
-            }
-
-            for entry in paths {
-                let name = entry
-                    .file_stem()
-                    .unwrap_or_default()
-                    .to_str()
-                    .unwrap_or_default();
-                // We could make these optional. Just warn users or something.
-                if entry.starts_with(&target_dir.join("partials")) {
-                    assert!(&self
-                        .engine
-                        .register_partial(
-                            &name,
-                            fs::read_to_string(&entry).expect("Failed to load partial {name}")
-                        )
-                        .is_ok());
-                } else {
-                    assert!(&self
-                        .engine
-                        .register_template_string(
-                            &name,
-                            fs::read_to_string(&entry).expect("Failed to load template {name}")
-                        )
-                        .is_ok());
-                }
-            }
-        }
+        self.reload_engine();
         Ok(())
     }
 
@@ -166,11 +123,17 @@ impl Wingman<'_> {
         fs::write(&cwd.join("templates/page.hbs"), page_tmpl)?;
         fs::write(&cwd.join("templates/partials/nav.hbs"), nav_partial)?;
         fs::write(&cwd.join("www/static/page.css"), page_css)?;
+        let index_md = Frontmatter::default().meta;
+        let index_yml = serde_yaml::to_string(&index_md)?;
 
+        fs::write(
+            &cwd.join("www/index.md"),
+            format!("---\n\n{index_yml}\n\n---"),
+        )?;
         Ok(())
     }
 
-    pub async fn build(&self, watch: bool) -> anyhow::Result<()> {
+    pub async fn build(&mut self, watch: bool) -> anyhow::Result<()> {
         if watch {
             println!("Watching ./www for changes");
             let (tx, rx) = std::sync::mpsc::channel();
@@ -187,6 +150,9 @@ impl Wingman<'_> {
                         | notify::EventKind::Modify(_)
                         | notify::EventKind::Remove(_) => {
                             for path in event.paths {
+                                if path.extension().is_some_and(|x| x == "hbs" || x == "handlebars") {
+                                    self.reload_engine();
+                                }
                                 // println!("Rendering {}", &path.display());
                                 if let Err(e) = &self.render_file(path).await {
                                     match e.downcast_ref::<WingmanError>() {
@@ -205,6 +171,7 @@ impl Wingman<'_> {
                 }
             }
         } else {
+            self.reload_engine();
             let start = Instant::now();
             let mut handles = vec![];
             for entry in walkdir::WalkDir::new(&self.sourcecode) {
@@ -227,12 +194,13 @@ impl Wingman<'_> {
             for result in results {
                 match result {
                     Ok(_) => {}
-                    Err(e) => match e.downcast_ref::<WingmanError>() {
-                        // This might not work? When I run tests, it prints regardless.
-                        Some(WingmanError::InputNotExist(_))
-                        | Some(WingmanError::InputNotFile(_)) => continue,
-                        _ => eprintln!("{}", Color::Red.paint(e.to_string())),
-                    },
+                    Err(e) => eprintln!("{e}"),
+                    // match e.downcast_ref::<WingmanError>() {
+                    //     // This might not work? When I run tests, it prints regardless.
+                    //     Some(WingmanError::InputNotExist(_))
+                    //     | Some(WingmanError::InputNotFile(_)) => continue,
+                    //     _ => eprintln!("{}", Color::Red.paint(e.to_string())),
+                    // },
                 }
             }
 
@@ -319,6 +287,56 @@ impl Wingman<'_> {
         }
 
         Ok(())
+    }
+
+    fn reload_engine(&mut self) {
+        // BUG: Just realized that if you add a new template or partial after starting the program, Wingman won't refresh
+        // HBS and it'll have to be restarted. 
+        let target_dir = crate::cwd().join("templates");
+        if target_dir.exists() {
+            let mut paths: Vec<PathBuf> = vec![];
+
+            for entry in walkdir::WalkDir::new(&target_dir)
+                .into_iter()
+                .filter_map(|e| e.ok())
+            {
+                // println!("{}", &entry.path().display());
+
+                if entry
+                    .path()
+                    .extension()
+                    .is_some_and(|x| x == "hbs" || x == "handlebars")
+                {
+                    paths.push(entry.path().to_path_buf())
+                }
+            }
+
+            for entry in paths {
+                let name = entry
+                    .file_stem()
+                    .unwrap_or_default()
+                    .to_str()
+                    .unwrap_or_default();
+                // We could make these optional. Just warn users or something.
+                if entry.starts_with(&target_dir.join("partials")) {
+                    assert!(&self
+                        .engine
+                        .register_partial(
+                            &name,
+                            fs::read_to_string(&entry).expect("Failed to load partial {name}")
+                        )
+                        .is_ok());
+                } else {
+                    assert!(&self
+                        .engine
+                        .register_template_string(
+                            &name,
+                            fs::read_to_string(&entry).expect("Failed to load template {name}")
+                        )
+                        .is_ok());
+                }
+            }
+        }
     }
 }
 
