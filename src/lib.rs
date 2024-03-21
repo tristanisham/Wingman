@@ -152,8 +152,7 @@ impl Wingman<'_> {
                         // notify::EventKind::Any => todo!(),
                         notify::EventKind::Access(_)
                         | notify::EventKind::Create(_)
-                        | notify::EventKind::Modify(_)
-                        | notify::EventKind::Remove(_) => {
+                        | notify::EventKind::Modify(_) => {
                             for path in event.paths {
                                 // println!("Rendering {}", &path.display());
                                 if let Err(e) = &self.render_file(path).await {
@@ -171,6 +170,8 @@ impl Wingman<'_> {
                                 self.reload_engine();
                             }
                         }
+                        // TODO: remove from production when dev is deleted, and maybe remove trace dependencies?
+                        notify::EventKind::Remove(_) => {}
                         // notify::EventKind::Other => todo!(),
                         _ => {}
                     },
@@ -290,7 +291,6 @@ impl Wingman<'_> {
                     ..Default::default()
                 })
                 .unwrap();
-
 
             if let Some(parent) = destination_pb.parent() {
                 fs::create_dir_all(parent)?;

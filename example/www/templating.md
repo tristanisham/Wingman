@@ -1,7 +1,0 @@
----
-
-title: Templating
-
----
-
-# Magic keywords

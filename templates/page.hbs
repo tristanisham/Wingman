@@ -9,7 +9,8 @@
     <meta name="color-scheme" content="dark light">
     <title>{{meta.title}}</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/static/page.css">
+    {{!-- <link rel="stylesheet" href="/static/page.css"> --}}
+    <link rel="stylesheet" href="/static/tailwind.css">
     {{!-- Pregenerated bullshit --}}
     <style>
         pre code.hljs {
@@ -126,19 +127,24 @@
         .hljs-link {
             text-decoration: underline
         }
-
-
-
     </style>
     {{!-- End pregenerated bullshit --}}
 </head>
 
-<body>
+<body class="bg-background-50">
     {{> nav}}
-    <main class="container mx-auto">
-        <article id="wm-article" >
-            {{{content}}}
-        </article>
+    <main class="mt-4 md:flex md:flex-1 md:justify-center md:items-center">
+        <div class=" mx-2 md:mx-4 pb-6">
+            <div class="container mx-auto">
+                {{!-- <article class="prose prose-sm sm:prose-md md:prose-lg lg:prose-xl prose-code:rounded prose-code:before:bg-background-400 prose-code:bg-background-400 prose-code:after:bg-background-400 prose-code:text-text-950 prose-code:font-mono prose-code:px-1 sm:prose-code:px-2 md:prose-code:px-3 lg:prose-code:px-4 prose-li:text-900 prose-a:text-primary-400 prose-a:visited:text-text-600 prose-a:hover:text-primary-800 prose-p:text-primary prose-p:text-text-950 prose-strong:text-text-950 prose-strong:font-bold prose-headings:text-secondary-800 prose-li:text-text-900"></article> --}}
+                <article
+                    class="prose prose-sm sm:prose-md md:prose-lg lg:prose-xl prose-code:rounded prose-code:before:bg-background-400 prose-code:bg-background-400 prose-code:after:bg-background-400 prose-code:text-text-950 prose-code:font-mono prose-code:px-1 prose-li:text-900 prose-a:text-primary-400 prose-a:visited:text-text-600 prose-a:hover:text-primary-800  prose-p:text-primary prose-p:text-text-950 prose-strong:text-text-950 prose-strong:font-bold prose-headings:text-secondary-800 prose-li:text-text-900">
+                    {{{content}}}
+                </article>
+            </div>
+
+        </div>
+
     </main>
     <script type="module">
         import hljs from "https://esm.sh/@highlightjs/cdn-assets@11.9.0/highlight.min.js?bundled"
