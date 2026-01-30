@@ -2,7 +2,7 @@
 name = "wingman"
 version = "0.1.1"
 authors = ["Tristan Isham <tristan@isham.co>"]
-edition = "2021"
+edition = "2024"
 description = "A runtime for websites and a static site generator."
 homepage = "https://wingman-rs.neocities.org/"
 license = "MIT"
