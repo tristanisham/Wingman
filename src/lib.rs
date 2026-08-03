@@ -1,15 +1,15 @@
-use ansi_term::Color;
-use anyhow::anyhow;
+use anyhow::{Context, anyhow};
 use comrak::{markdown_to_html, Options};
 use frontmatter::Frontmatter;
 use handlebars::Handlebars;
 use lightningcss::stylesheet::{MinifyOptions, ParserOptions, PrinterOptions, StyleSheet};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
+use nu_ansi_term::Color;
 use serde::{Deserialize, Serialize};
 use std::{
     env, fs,
     net::SocketAddr,
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
 };
 use thiserror::Error;
 
@@ -35,6 +35,24 @@ pub fn is_empty<P: AsRef<Path>>(p: P) -> bool {
 pub fn cwd() -> PathBuf {
     let cwd = env::current_dir().unwrap_or(PathBuf::from("."));
     cwd
+}
+
+/// Maps a file under `source_root` onto the matching location under `target_root`.
+///
+/// This is deliberately component-based. The previous string `replacen` left the
+/// path untouched whenever the prefix didn't match, which silently wrote build
+/// output back into the source tree, and it carried `..` segments straight
+/// through into the target. Both are rejected here instead.
+fn destination_for(source_root: &Path, target_root: &Path, path: &Path) -> anyhow::Result<PathBuf> {
+    let outside = || anyhow!(WingmanError::OutsideSourceTree(path.to_path_buf()));
+
+    let relative = path.strip_prefix(source_root).map_err(|_| outside())?;
+
+    if relative.components().any(|c| c == Component::ParentDir) {
+        return Err(outside());
+    }
+
+    Ok(target_root.join(relative))
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -105,7 +123,7 @@ impl Wingman<'_> {
         }
 
         self.create_project_structure()?;
-        self.reload_engine();
+        self.reload_engine()?;
         Ok(())
     }
 
@@ -139,7 +157,7 @@ impl Wingman<'_> {
         }
 
         if watch {
-            self.reload_engine();
+            self.reload_engine()?;
             println!("Watching ./www for changes");
             let (tx, rx) = std::sync::mpsc::channel();
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
@@ -159,7 +177,8 @@ impl Wingman<'_> {
                                     match e.downcast_ref::<WingmanError>() {
                                         // This might not work? When I run tests, it prints regardless.
                                         Some(WingmanError::InputNotExist(_))
-                                        | Some(WingmanError::InputNotFile(_)) => continue,
+                                        | Some(WingmanError::InputNotFile(_))
+                                        | Some(WingmanError::OutsideSourceTree(_)) => continue,
                                         _ => eprintln!(
                                             "{:#?}: {}",
                                             &event.kind,
@@ -167,7 +186,10 @@ impl Wingman<'_> {
                                         ),
                                     }
                                 }
-                                self.reload_engine();
+                                // A bad template shouldn't kill a long-running watcher.
+                                if let Err(e) = self.reload_engine() {
+                                    eprintln!("{}", Color::Red.paint(format!("{e:#}")));
+                                }
                             }
                         }
                         // TODO: remove from production when dev is deleted, and maybe remove trace dependencies?
@@ -179,7 +201,7 @@ impl Wingman<'_> {
                 }
             }
         } else {
-            self.reload_engine();
+            self.reload_engine()?;
             let start = Instant::now();
             let mut handles = vec![];
             for entry in walkdir::WalkDir::new(&self.sourcecode) {
@@ -233,15 +255,7 @@ impl Wingman<'_> {
             ))));
         }
 
-        let cwd = crate::cwd();
-        let www = &cwd.join("www");
-        let site = &cwd.join("_site");
-
-        let mut destination_pb = PathBuf::from(p.as_ref().to_string_lossy().to_string().replacen(
-            &www.to_string_lossy().to_string(),
-            &site.to_string_lossy().to_string(),
-            1,
-        ));
+        let mut destination_pb = destination_for(&self.sourcecode, &self.target, p.as_ref())?;
 
         if p.as_ref().extension().is_some_and(|x| x == "md") {
             let file = fs::read_to_string(&p)?;
@@ -276,21 +290,23 @@ impl Wingman<'_> {
         } else if p.as_ref().extension().is_some_and(|x| x == "css") {
             let css: String = fs::read_to_string(&p)?;
             // Parse a style sheet from a string.
+            // A malformed stylesheet is bad input, not a bug in Wingman: report it and
+            // keep going instead of taking the whole build (or watcher) down with us.
             let mut stylesheet = match StyleSheet::parse(&css, ParserOptions::default()) {
                 Ok(s) => s,
-                Err(e) => panic!("{e}"),
+                Err(e) => {
+                    return Err(anyhow!("failed to parse {}: {e}", p.as_ref().display()));
+                }
             };
 
             // Minify the stylesheet.
             stylesheet.minify(MinifyOptions::default())?;
 
             // Serialize it to a string.
-            let res = stylesheet
-                .to_css(PrinterOptions {
-                    minify: true,
-                    ..Default::default()
-                })
-                .unwrap();
+            let res = stylesheet.to_css(PrinterOptions {
+                minify: true,
+                ..Default::default()
+            })?;
 
             if let Some(parent) = destination_pb.parent() {
                 fs::create_dir_all(parent)?;
@@ -306,7 +322,7 @@ impl Wingman<'_> {
         Ok(())
     }
 
-    fn reload_engine(&mut self) {
+    fn reload_engine(&mut self) -> anyhow::Result<()> {
         // BUG: Just realized that if you add a new template or partial after starting the program, Wingman won't refresh
         // HBS and it'll have to be restarted.
         let target_dir = crate::cwd().join("templates");
@@ -334,26 +350,26 @@ impl Wingman<'_> {
                     .unwrap_or_default()
                     .to_str()
                     .unwrap_or_default();
-                // We could make these optional. Just warn users or something.
+                // A broken template is user input. Surface the parse error instead of
+                // asserting on it -- the assert both aborted the process and threw away
+                // the one thing that explains what went wrong.
                 if entry.starts_with(&target_dir.join("partials")) {
-                    assert!(&self
-                        .engine
-                        .register_partial(
-                            &name,
-                            fs::read_to_string(&entry).expect("Failed to load partial {name}")
-                        )
-                        .is_ok());
+                    let source = fs::read_to_string(&entry)
+                        .with_context(|| format!("failed to load partial {name}"))?;
+                    self.engine
+                        .register_partial(name, source)
+                        .with_context(|| format!("failed to register partial {name}"))?;
                 } else {
-                    assert!(&self
-                        .engine
-                        .register_template_string(
-                            &name,
-                            fs::read_to_string(&entry).expect("Failed to load template {name}")
-                        )
-                        .is_ok());
+                    let source = fs::read_to_string(&entry)
+                        .with_context(|| format!("failed to load template {name}"))?;
+                    self.engine
+                        .register_template_string(name, source)
+                        .with_context(|| format!("failed to register template {name}"))?;
                 }
             }
         }
+
+        Ok(())
     }
 }
 
@@ -364,4 +380,50 @@ pub enum WingmanError {
 
     #[error("input is not a file")]
     InputNotFile(PathBuf),
+
+    #[error("input resolves outside the source directory")]
+    OutsideSourceTree(PathBuf),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn maps_source_paths_into_the_target_tree() {
+        let dest = destination_for(
+            Path::new("/site/www"),
+            Path::new("/site/_site"),
+            Path::new("/site/www/blog/post.md"),
+        )
+        .expect("path inside the source tree should map");
+
+        assert_eq!(dest, PathBuf::from("/site/_site/blog/post.md"));
+    }
+
+    #[test]
+    fn rejects_paths_outside_the_source_tree() {
+        // Nothing under the source root, so there is no output location for it.
+        // Previously this fell through and wrote back over the input path.
+        let err = destination_for(
+            Path::new("/site/www"),
+            Path::new("/site/_site"),
+            Path::new("/etc/passwd"),
+        );
+
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn rejects_traversal_out_of_the_target_tree() {
+        // Textually prefixed by the source root, but the `..` segments walk back
+        // out again -- joining this onto the target would escape it entirely.
+        let err = destination_for(
+            Path::new("/site/www"),
+            Path::new("/site/_site"),
+            Path::new("/site/www/../../etc/cron.d/payload.md"),
+        );
+
+        assert!(err.is_err());
+    }
 }

@@ -30,7 +30,9 @@ exclude = [
 notify = { version = "6.1.1" }
 anyhow = "1.0.81"
 clap = { version = "4.5.3", features = ["unicode", "derive"] }
-comrak = "0.21.0"
+# default features pull in syntect (and its unmaintained bincode/yaml-rust and
+# vulnerable quick-xml deps) plus a CLI we don't use. We only call markdown_to_html.
+comrak = { version = "0.21.0", default-features = false }
 lightningcss = "1.0.0-alpha.55"
 rayon = "1.9.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -40,7 +42,7 @@ tokio = { version = "1", features = ["full"] }
 axum = "0.7.4"
 tower-http = { version = "0.5.2", features = ["fs", "trace"] }
 gray_matter = "0.2.6"
-ansi_term = "0.12.1"
+nu-ansi-term = "0.50.2"
 walkdir = "2.5.0"
 thiserror = "1.0.58"
 futures = "0.3.30"

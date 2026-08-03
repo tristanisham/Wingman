@@ -9,14 +9,30 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# Least privilege: this workflow only needs to read the tree. Without an explicit
+# block the job inherits the repository default, which can be read/write.
+permissions:
+  contents: read
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+
+  audit:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --locked
+    - name: Audit dependencies
+      run: cargo audit

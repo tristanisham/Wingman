@@ -146,9 +146,18 @@
         </div>
 
     </main>
-    <script type="module">
-        import hljs from "https://esm.sh/@highlightjs/cdn-assets@11.9.0/highlight.min.js?bundled"
-        hljs.highlightAll();
+    {{!--
+        Served straight from the npm package so the bytes are pinned by Subresource
+        Integrity. The old esm.sh module import had no integrity attribute (a bare
+        `import` can't carry one), so every generated page executed whatever that
+        CDN's build layer returned at load time.
+    --}}
+    <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"
+        integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp"
+        crossorigin="anonymous"></script>
+    <script>
+        // Integrity failure leaves hljs undefined; don't throw on top of it.
+        if (window.hljs) hljs.highlightAll();
     </script>
 
 </body>
