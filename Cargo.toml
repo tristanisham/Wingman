@@ -33,7 +33,9 @@ clap = { version = "4.5.3", features = ["unicode", "derive"] }
 # default features pull in syntect (and its unmaintained bincode/yaml-rust and
 # vulnerable quick-xml deps) plus a CLI we don't use. We only call markdown_to_html.
 comrak = { version = "0.21.0", default-features = false }
-lightningcss = "1.0.0-alpha.55"
+# default features pull in parcel_sourcemap -> rkyv 0.7 (RUSTSEC-2026-0235) plus
+# a bundler and nodejs bindings we don't use. We only parse and minify.
+lightningcss = { version = "1.0.0-alpha.55", default-features = false }
 rayon = "1.9.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9.33"

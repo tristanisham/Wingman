@@ -1,9 +1,18 @@
 {
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.10",
-    "tailwindcss": "^3.4.1"
+    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/typography": "^0.5.20",
+    "tailwindcss": "^4.3.3"
   },
   "scripts": {
-    "style:watch": "npx tailwindcss -i tailwind.css -o www/static/tailwind.css --watch --minify"
+    "style:watch": "tailwindcss -i tailwind.css -o www/static/tailwind.css --watch --minify"
+  },
+  "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^7.1.6"
+    },
+    "@tailwindcss/cli": {
+      "@parcel/watcher": "^2.6.0"
+    }
   }
 }
