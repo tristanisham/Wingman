@@ -5,5 +5,8 @@
   },
   "scripts": {
     "style:watch": "npx tailwindcss -i tailwind.css -o www/static/tailwind.css --watch --minify"
+  },
+  "overrides": {
+    "postcss-selector-parser": "^6.1.5"
   }
 }
